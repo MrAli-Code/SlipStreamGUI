@@ -41,10 +41,15 @@
   <img src="intro.png" alt="SlipStream GUI" width="300">
 </div>
 
-
-
-
 ---
+
+## 👀 Tour
+
+- **Install** the app from the latest release
+- **Set your server** (`Domain`) and `DNS Resolver` (or keep defaults for testing)
+- **Start VPN** and watch the **Status** indicators turn “Running”
+- **Verify** with “Test Proxy Connection” and check the **Logs** panel if needed
+- **Optional**: Share your VPN over Wi‑Fi to your phone using the built-in HTTP proxy (`8080`)
 
 ## 📥 Download & Install
 
@@ -56,10 +61,18 @@
   </a>
 </div>
 
-**Available for:**
-- 🍎 macOS (DMG installer)
-- 🪟 Windows (EXE installer)
-- 🐧 Linux (AppImage and DEB packages)
+**Direct downloads (latest release):**
+
+| Platform | Download |
+|----------|----------|
+| macOS (Apple Silicon) | [SlipStream-GUI-macOS-ARM64.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-ARM64.dmg) |
+| macOS (Intel) | [SlipStream-GUI-macOS-Intel.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-Intel.dmg) |
+| Windows (64-bit) | [SlipStream-GUI-Windows-x64.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x64.exe) |
+| Windows (32-bit) | [SlipStream-GUI-Windows-x86.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [SlipStream-GUI-Linux-x64.AppImage](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [SlipStream-GUI-Linux-x64.deb](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.deb) |
+
+If a direct download fails, use the [Releases page](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest).
 
 ### Quick Install
 
@@ -181,7 +194,7 @@ The IP address will typically look like `192.168.1.XXX` or `10.0.0.XXX`.
 4. Select **"Manual"**
 5. Enter your PC's IP address in **"Server"** field (e.g., `192.168.1.100`)
 6. Enter **"8080"** in the **"Port"** field
-7. Leave **"Authentication"** off (unless you've configured it)
+7. Leave **"Authentication"** off
 8. Tap **"Save"** in the top right
 
 **Note:** Your iOS device will now route all internet traffic through your PC's VPN connection. To disable, go back to Wi-Fi settings and set HTTP Proxy to "Off".

@@ -7,11 +7,34 @@
 
 ---
 
+## 👀 تور سریع
+
+- **دانلود و نصب** برنامه از صفحه Release
+- **تنظیم سرور** (Domain) و **DNS Resolver** (در صورت نیاز)
+- **شروع VPN** با دکمه "Start VPN" و بررسی اینکه وضعیت‌ها "Running" شوند
+- **بررسی اتصال** با دکمه "Test Proxy Connection" و مشاهده لاگ‌ها در صورت نیاز
+- **اختیاری**: اشتراک اینترنت روی Wi‑Fi برای موبایل از طریق HTTP Proxy داخلی (`8080`)
+
+---
+
 ## 📥 نصب و راه‌اندازی
 
 ### دانلود و نصب
 
 1. به صفحه [Releases](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest) بروید
+2. دانلود مستقیم آخرین نسخه:
+
+| پلتفرم | دانلود |
+|----------|----------|
+| macOS (Apple Silicon) | [SlipStream-GUI-macOS-ARM64.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-ARM64.dmg) |
+| macOS (Intel) | [SlipStream-GUI-macOS-Intel.dmg](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-macOS-Intel.dmg) |
+| Windows (64-bit) | [SlipStream-GUI-Windows-x64.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x64.exe) |
+| Windows (32-bit) | [SlipStream-GUI-Windows-x86.exe](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Windows-x86.exe) |
+| Linux (x86_64) AppImage | [SlipStream-GUI-Linux-x64.AppImage](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.AppImage) |
+| Linux (x86_64) DEB | [SlipStream-GUI-Linux-x64.deb](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest/download/SlipStream-GUI-Linux-x64.deb) |
+
+اگر دانلود مستقیم کار نکرد، از صفحه [Releases](https://github.com/mirzaaghazadeh/SlipStreamGUI/releases/latest) استفاده کنید.
+
 2. فایل نصب مناسب سیستم عامل خود را دانلود کنید:
    - 🍎 **macOS**: فایل DMG
    - 🪟 **Windows**: فایل EXE
@@ -119,7 +142,7 @@ ipconfig
 4. **"Manual"** را انتخاب کنید
 5. آدرس IP کامپیوتر خود را در فیلد **"Server"** وارد کنید (مثلاً: `192.168.1.100`)
 6. عدد **"8080"** را در فیلد **"Port"** وارد کنید
-7. **"Authentication"** را خاموش بگذارید (مگر اینکه آن را تنظیم کرده باشید)
+7. **"Authentication"** را خاموش بگذارید
 8. در گوشه بالا سمت راست روی **"Save"** ضربه بزنید
 
 **نکته:** حالا تمام ترافیک اینترنت آیفون/آیپد شما از طریق VPN کامپیوتر مسیریابی می‌شود. برای غیرفعال کردن، به تنظیمات Wi-Fi برگردید و HTTP Proxy را روی "Off" تنظیم کنید.

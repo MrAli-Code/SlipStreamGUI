@@ -57,8 +57,15 @@ Examples:
 
 ### What Gets Built
 
-- **macOS**: DMG installer (`SlipStream GUI-1.0.0.dmg`)
-- **Windows**: NSIS installer (`SlipStream GUI Setup 1.0.0.exe`)
+- **macOS**: DMG installers
+  - `SlipStream-GUI-macOS-ARM64.dmg`
+  - `SlipStream-GUI-macOS-Intel.dmg`
+- **Windows**: NSIS installers
+  - `SlipStream-GUI-Windows-x64.exe`
+  - `SlipStream-GUI-Windows-x86.exe`
+- **Linux**: AppImage and DEB packages
+  - `SlipStream-GUI-Linux-x64.AppImage`
+  - `SlipStream-GUI-Linux-x64.deb`
 
 ### Release Notes
 

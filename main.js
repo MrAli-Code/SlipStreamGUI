@@ -21,6 +21,9 @@ let RESOLVER = '8.8.8.8:53';
 let DOMAIN = 's.example.com';
 let useTunMode = false; // Toggle between HTTP proxy and TUN mode
 let verboseLogging = false; // Verbose logging toggle
+let socks5AuthEnabled = false;
+let socks5AuthUsername = '';
+let socks5AuthPassword = '';
 
 // Load settings from file
 const SETTINGS_FILE = path.join(__dirname, 'settings.json');
@@ -33,23 +36,36 @@ function loadSettings() {
       if (settings.domain) DOMAIN = settings.domain;
       if (settings.mode) useTunMode = (settings.mode === 'tun');
       if (settings.verbose !== undefined) verboseLogging = settings.verbose;
+      if (settings.socks5AuthEnabled !== undefined) socks5AuthEnabled = !!settings.socks5AuthEnabled;
+      if (typeof settings.socks5AuthUsername === 'string') socks5AuthUsername = settings.socks5AuthUsername;
+      if (typeof settings.socks5AuthPassword === 'string') socks5AuthPassword = settings.socks5AuthPassword;
     }
   } catch (err) {
     console.error('Failed to load settings:', err);
   }
 }
 
-function saveSettings(resolver, domain, mode, verbose) {
+function saveSettings(overrides = {}) {
   try {
-    const settings = { resolver, domain, mode };
-    if (verbose !== undefined) {
-      settings.verbose = verbose;
-      verboseLogging = verbose;
-    }
-    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
-    RESOLVER = resolver;
-    DOMAIN = domain;
-    if (mode) useTunMode = (mode === 'tun');
+    const next = {
+      resolver: overrides.resolver ?? RESOLVER,
+      domain: overrides.domain ?? DOMAIN,
+      mode: overrides.mode ?? (useTunMode ? 'tun' : 'proxy'),
+      verbose: overrides.verbose ?? verboseLogging,
+      socks5AuthEnabled: overrides.socks5AuthEnabled ?? socks5AuthEnabled,
+      socks5AuthUsername: overrides.socks5AuthUsername ?? socks5AuthUsername,
+      socks5AuthPassword: overrides.socks5AuthPassword ?? socks5AuthPassword
+    };
+
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(next, null, 2));
+
+    RESOLVER = next.resolver;
+    DOMAIN = next.domain;
+    useTunMode = next.mode === 'tun';
+    verboseLogging = !!next.verbose;
+    socks5AuthEnabled = !!next.socks5AuthEnabled;
+    socks5AuthUsername = next.socks5AuthUsername || '';
+    socks5AuthPassword = next.socks5AuthPassword || '';
   } catch (err) {
     console.error('Failed to save settings:', err);
   }
@@ -129,6 +145,16 @@ function startSlipstreamClient(resolver, domain) {
   if (!clientPath) {
     throw new Error('Unsupported platform');
   }
+  if (!fs.existsSync(clientPath)) {
+    const where = app.isPackaged ? 'inside the app resources folder' : 'in the project root';
+    const baseMsg = `SlipStream client binary not found ${where}.`;
+    const expectedMsg = `Expected at: ${clientPath}`;
+    const hint =
+      process.platform === 'win32'
+        ? 'This usually means the installer was built without the Windows client binary, or it was quarantined/removed by antivirus. Reinstall, or whitelist the app folder, and ensure the build includes slipstream-client-win.exe.'
+        : 'Ensure the correct slipstream client binary exists and is executable.';
+    throw new Error(`${baseMsg}\n${expectedMsg}\n${hint}`);
+  }
 
   // Ensure execute permissions on macOS and Linux (automatic, no user action needed)
   if ((process.platform === 'darwin' || process.platform === 'linux') && fs.existsSync(clientPath)) {
@@ -195,15 +221,37 @@ function startSlipstreamClient(resolver, domain) {
   });
 
   return new Promise((resolve, reject) => {
-    // Wait a bit for SOCKS5 to be ready
-    setTimeout(() => {
-      if (slipstreamProcess && !slipstreamProcess.killed) {
-        sendStatusUpdate();
-        resolve();
-      } else {
-        reject(new Error('Slipstream client failed to start'));
+    let settled = false;
+    const settle = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      fn(value);
+    };
+
+    // If spawn fails (e.g., ENOENT), reject instead of crashing/pretending success.
+    slipstreamProcess.once('error', (err) => {
+      const msg = `SlipStream failed to start: ${err.code || 'ERROR'} ${err.message || String(err)}`;
+      console.error(msg);
+      slipstreamProcess = null;
+      if (mainWindow) {
+        mainWindow.webContents.send('slipstream-error', msg);
+        mainWindow.webContents.send('slipstream-exit', -1);
       }
-    }, 2000);
+      sendStatusUpdate();
+      settle(reject, new Error(`Slipstream client failed to start: ${err.message || String(err)}`));
+    });
+
+    // Only start the readiness timer after the process actually spawned.
+    slipstreamProcess.once('spawn', () => {
+      setTimeout(() => {
+        if (slipstreamProcess && !slipstreamProcess.killed) {
+          sendStatusUpdate();
+          settle(resolve);
+        } else {
+          settle(reject, new Error('Slipstream client failed to start'));
+        }
+      }, 2000);
+    });
   });
 }
 
@@ -216,8 +264,25 @@ function sendStatusUpdate() {
 
 function startHttpProxy() {
   return new Promise((resolve, reject) => {
-    // Create SOCKS5 agent
-    const socksAgent = new SocksProxyAgent(`socks5://127.0.0.1:${SOCKS5_PORT}`);
+    function buildSocks5Url() {
+      if (!socks5AuthEnabled) return `socks5://127.0.0.1:${SOCKS5_PORT}`;
+      if (!socks5AuthUsername || !socks5AuthPassword) return `socks5://127.0.0.1:${SOCKS5_PORT}`;
+      const u = encodeURIComponent(socks5AuthUsername);
+      const p = encodeURIComponent(socks5AuthPassword);
+      return `socks5://${u}:${p}@127.0.0.1:${SOCKS5_PORT}`;
+    }
+
+    // Create SOCKS5 agent (optionally with auth), and refresh if settings change
+    let socksAgent = null;
+    let socksAgentUrl = null;
+    function getSocksAgent() {
+      const url = buildSocks5Url();
+      if (!socksAgent || socksAgentUrl !== url) {
+        socksAgent = new SocksProxyAgent(url);
+        socksAgentUrl = url;
+      }
+      return socksAgent;
+    }
     const net = require('net');
     const https = require('https');
     const httpLib = require('http');
@@ -251,11 +316,19 @@ function startHttpProxy() {
       logRequest(`🔒 CONNECT ${host}:${port} (HTTPS)`);
       
       // Connect through SOCKS5
+      const socksProxy = {
+        host: '127.0.0.1',
+        port: SOCKS5_PORT,
+        type: 5
+      };
+      if (socks5AuthEnabled && socks5AuthUsername && socks5AuthPassword) {
+        socksProxy.userId = socks5AuthUsername;
+        socksProxy.password = socks5AuthPassword;
+      }
+
       SocksClient.createConnection({
         proxy: {
-          host: '127.0.0.1',
-          port: SOCKS5_PORT,
-          type: 5
+          ...socksProxy
         },
         command: 'connect',
         destination: {
@@ -401,7 +474,7 @@ function startHttpProxy() {
           // options.headers.connection = 'close';
           
           // Use SOCKS5 agent
-          options.agent = socksAgent;
+          options.agent = getSocksAgent();
           
           // Set timeout
           options.timeout = 30000;
@@ -492,11 +565,19 @@ function startHttpProxy() {
       const host = urlParts[0];
       const port = parseInt(urlParts[1] || '80');
       
+      const socksProxy = {
+        host: '127.0.0.1',
+        port: SOCKS5_PORT,
+        type: 5
+      };
+      if (socks5AuthEnabled && socks5AuthUsername && socks5AuthPassword) {
+        socksProxy.userId = socks5AuthUsername;
+        socksProxy.password = socks5AuthPassword;
+      }
+
       SocksClient.createConnection({
         proxy: {
-          host: '127.0.0.1',
-          port: SOCKS5_PORT,
-          type: 5
+          ...socksProxy
         },
         command: 'connect',
         destination: {
@@ -743,7 +824,7 @@ async function startService(resolver, domain, tunMode = false) {
   try {
     // Save settings
     if (resolver && domain) {
-      saveSettings(resolver, domain, useTunMode ? 'tun' : 'proxy');
+      saveSettings({ resolver, domain, mode: useTunMode ? 'tun' : 'proxy' });
     } else {
       resolver = RESOLVER;
       domain = DOMAIN;
@@ -927,7 +1008,10 @@ ipcMain.handle('get-settings', () => {
     resolver: RESOLVER,
     domain: DOMAIN,
     mode: useTunMode ? 'tun' : 'proxy',
-    verbose: verboseLogging
+    verbose: verboseLogging,
+    socks5AuthEnabled,
+    socks5AuthUsername,
+    socks5AuthPassword
   };
 });
 
@@ -1035,8 +1119,27 @@ function compareVersions(v1, v2) {
 
 ipcMain.handle('set-verbose', (event, verbose) => {
   verboseLogging = verbose;
-  saveSettings(RESOLVER, DOMAIN, useTunMode ? 'tun' : 'proxy', verbose);
+  saveSettings({ verbose });
   return { success: true, verbose: verboseLogging };
+});
+
+ipcMain.handle('set-socks5-auth', (event, auth) => {
+  const enabled = !!auth?.enabled;
+  const username = typeof auth?.username === 'string' ? auth.username : socks5AuthUsername;
+  const password = typeof auth?.password === 'string' ? auth.password : socks5AuthPassword;
+
+  saveSettings({
+    socks5AuthEnabled: enabled,
+    socks5AuthUsername: username,
+    socks5AuthPassword: password
+  });
+
+  return {
+    success: true,
+    socks5AuthEnabled,
+    socks5AuthUsername,
+    socks5AuthPassword
+  };
 });
 
 ipcMain.handle('check-system-proxy', async () => {
@@ -1074,7 +1177,7 @@ ipcMain.handle('test-proxy', async () => {
   return new Promise((resolve) => {
     const startTime = Date.now();
     const http = require('http');
-    
+
     const options = {
       hostname: '127.0.0.1',
       port: HTTP_PROXY_PORT,

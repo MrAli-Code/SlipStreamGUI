@@ -216,10 +216,18 @@ jobs:
         run: |
           mkdir -p release/windows
           if [ -d release/windows/x64 ]; then
-            mv release/windows/x64/* release/windows/ 2>/dev/null || true
+            for f in release/windows/x64/*.exe; do
+              [ -e "$f" ] || continue
+              mv "$f" "release/windows/SlipStream-GUI-Windows-x64.exe"
+              break
+            done
           fi
           if [ -d release/windows/x86 ]; then
-            mv release/windows/x86/* release/windows/ 2>/dev/null || true
+            for f in release/windows/x86/*.exe; do
+              [ -e "$f" ] || continue
+              mv "$f" "release/windows/SlipStream-GUI-Windows-x86.exe"
+              break
+            done
           fi
           rm -rf release/windows/x64 release/windows/x86 2>/dev/null || true
 
@@ -231,6 +239,32 @@ jobs:
             mv release/linux/x64/* release/linux/ 2>/dev/null || true
           fi
           rm -rf release/linux/x64 2>/dev/null || true
+
+          # Normalize Linux filenames for stable "latest/download" links
+          if ls release/linux/*.AppImage >/dev/null 2>&1; then
+            mv release/linux/*.AppImage "release/linux/SlipStream-GUI-Linux-x64.AppImage" 2>/dev/null || true
+          fi
+          if ls release/linux/*_amd64.deb >/dev/null 2>&1; then
+            mv release/linux/*_amd64.deb "release/linux/SlipStream-GUI-Linux-x64.deb" 2>/dev/null || true
+          fi
+
+      - name: Normalize macOS filenames
+        shell: bash
+        run: |
+          # Normalize macOS filenames for stable "latest/download" links
+          if [ -d release/macos ]; then
+            if ls release/macos/*arm64*.dmg >/dev/null 2>&1; then
+              mv release/macos/*arm64*.dmg "release/macos/SlipStream-GUI-macOS-ARM64.dmg" 2>/dev/null || true
+            fi
+            if ls release/macos/*.dmg >/dev/null 2>&1; then
+              # Remaining DMG is assumed to be Intel
+              for f in release/macos/*.dmg; do
+                [ "$(basename "$f")" = "SlipStream-GUI-macOS-ARM64.dmg" ] && continue
+                mv "$f" "release/macos/SlipStream-GUI-macOS-Intel.dmg" 2>/dev/null || true
+                break
+              done
+            fi
+          fi
 
       - name: List downloaded artifacts
         shell: bash

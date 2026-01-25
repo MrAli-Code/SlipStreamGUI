@@ -33,7 +33,7 @@
         .main-panel {
             background: white;
             border-radius: 20px;
-            padding: 25px;
+            padding: 18px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             flex: 1;
             display: flex;
@@ -46,7 +46,7 @@
         .logs-panel {
             background: #1e1e1e;
             border-radius: 20px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             flex: 1;
             display: flex;
@@ -57,19 +57,19 @@
 
         .header {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             position: relative;
         }
 
         .header h1 {
             color: #667eea;
-            font-size: 24px;
+            font-size: 22px;
             margin-bottom: 3px;
         }
 
         .header p {
             color: #666;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .version-badge {
@@ -164,8 +164,8 @@
         .status {
             background: #f5f5f5;
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px;
+            margin-bottom: 10px;
         }
 
         .status-main {
@@ -176,7 +176,7 @@
         }
 
         .status-main-text {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #333;
             margin-top: 6px;
@@ -215,7 +215,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .status-row:last-child {
@@ -240,19 +240,19 @@
         .settings {
             background: #f9f9f9;
             border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
         }
 
         .settings-header {
             font-size: 13px;
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .form-group {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .form-group:last-child {
@@ -265,7 +265,7 @@
             align-items: center;
             font-size: 12px;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 500;
         }
 
@@ -337,14 +337,14 @@
 
         .button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: none;
             border-radius: 10px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .button:disabled {
@@ -388,10 +388,10 @@
         }
 
         .logs-header {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #fff;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -440,13 +440,33 @@
             background: #1e1e1e;
             color: #d4d4d4;
             border-radius: 10px;
-            padding: 15px;
+            padding: 12px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+        }
+
+        /* Compact helper text in settings */
+        .settings-help {
+            font-size: 10px;
+            color: #666;
+            margin-top: 3px;
+            line-height: 1.35;
+        }
+
+        .settings-note {
+            font-size: 10px;
+            color: #666;
+            margin-top: 4px;
+            line-height: 1.35;
+        }
+
+        /* We do NOT support HTTP-proxy auth; keep this hidden */
+        .proxy-auth-section {
+            display: none !important;
         }
 
         .log-entry {
@@ -532,9 +552,13 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            /* Keep Help/About above all UI/tooltips/intro overlays */
+            z-index: 3000;
             justify-content: center;
             align-items: center;
+            /* If viewport is short, allow the overlay itself to scroll */
+            padding: 20px;
+            overflow: auto;
         }
 
         .modal.show {
@@ -544,11 +568,13 @@
         .modal-content {
             background: white;
             border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            margin: 20px;
+            /* Responsive sizing so the modal never "breaks" layout */
+            width: min(900px, calc(100vw - 40px));
+            max-width: 900px;
+            padding: clamp(16px, 3vw, 30px);
+            max-height: min(86vh, 900px);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
@@ -556,11 +582,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            /* Keep title + close accessible while scrolling */
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+            padding: 6px 0 12px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #eee;
         }
 
         .modal-title {
-            font-size: 24px;
+            font-size: clamp(18px, 2.2vw, 24px);
             font-weight: 600;
             color: #333;
         }
@@ -591,6 +624,13 @@
             font-weight: 600;
             color: #333;
             margin-bottom: 10px;
+        }
+
+        .modal-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin: 12px 0 8px;
         }
 
         .modal-section p {
@@ -820,8 +860,52 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </label>
-                    <div style="font-size: 11px; color: #666; margin-top: 5px;">
+                    <div class="settings-help">
                         Automatically configure system proxy settings to route all traffic through VPN
+                    </div>
+                </div>
+                <div class="form-group proxy-auth-section">
+                    <label class="form-label">
+                        <span>Proxy Authentication</span>
+                        <label class="toggle-container">
+                            <input type="checkbox" id="proxyAuthToggle" disabled>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <div class="settings-help">
+                        If enabled, clients must provide username/password (HTTP Proxy “Authentication”)
+                    </div>
+                </div>
+                <div class="form-group proxy-auth-section" id="proxyAuthFields" style="display:none;">
+                    <label class="form-label">Proxy Username</label>
+                    <input type="text" class="form-input" id="proxyAuthUsername" placeholder="username" autocomplete="off" spellcheck="false">
+                    <div style="height: 6px;"></div>
+                    <label class="form-label">Proxy Password</label>
+                    <input type="password" class="form-input" id="proxyAuthPassword" placeholder="password" autocomplete="new-password">
+                    <div class="settings-note">
+                        Note: enabling this may break “Configure System Proxy” unless your apps support proxy auth.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>Authentication</span>
+                        <label class="toggle-container">
+                            <input type="checkbox" id="socks5AuthToggle" onchange="toggleSocks5Auth()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <div class="settings-help">
+                        SOCKS5 (upstream) username/password. 
+                    </div>
+                </div>
+                <div class="form-group" id="socks5AuthFields" style="display:none;">
+                    <label class="form-label">SOCKS5 Username</label>
+                    <input type="text" class="form-input" id="socks5AuthUsername" placeholder="username" autocomplete="off" spellcheck="false">
+                    <div style="height: 6px;"></div>
+                    <label class="form-label">SOCKS5 Password</label>
+                    <input type="password" class="form-input" id="socks5AuthPassword" placeholder="password" autocomplete="new-password">
+                    <div class="settings-note">
+                        Note: changes take effect on the next VPN start (or restart).
                     </div>
                 </div>
                 <div class="form-group">
@@ -1048,7 +1132,7 @@ SlipStream VPN Server</pre>
                     <li>Select <strong>"Manual"</strong></li>
                     <li>Enter your PC's IP address in <strong>"Server"</strong> field (e.g., <code>192.168.1.100</code>)</li>
                     <li>Enter <strong>"8080"</strong> in the <strong>"Port"</strong> field</li>
-                    <li>Leave <strong>"Authentication"</strong> off (unless you've configured it)</li>
+                    <li>Leave <strong>"Authentication"</strong> off</li>
                     <li>Tap <strong>"Save"</strong> in the top right</li>
                 </ol>
                 <p><strong>Note:</strong> Your iOS device will now route all internet traffic through your PC's VPN connection. To disable, go back to Wi-Fi settings and set HTTP Proxy to "Off".</p>
@@ -1089,6 +1173,7 @@ SlipStream VPN Server</pre>
 
         let isRunning = false;
         let useTunMode = false;
+        let socks5AuthSaveTimer = null;
 
         function showHelp() {
             document.getElementById('helpModal').classList.add('show');
@@ -1231,6 +1316,43 @@ SlipStream VPN Server</pre>
                 addLog('Failed to ' + (enable ? 'configure' : 'unconfigure') + ' system proxy', true);
                 toggle.checked = !enable; // Revert toggle
             }
+        }
+
+        function updateSocks5AuthVisibility() {
+            const toggle = document.getElementById('socks5AuthToggle');
+            const fields = document.getElementById('socks5AuthFields');
+            if (!toggle || !fields) return;
+            fields.style.display = toggle.checked ? 'block' : 'none';
+        }
+
+        async function saveSocks5AuthSettings() {
+            const enabled = document.getElementById('socks5AuthToggle')?.checked || false;
+            const username = document.getElementById('socks5AuthUsername')?.value || '';
+            const password = document.getElementById('socks5AuthPassword')?.value || '';
+
+            try {
+                const result = await ipcRenderer.invoke('set-socks5-auth', { enabled, username, password });
+                if (result?.success) {
+                    addLog(`SOCKS5 authentication ${enabled ? 'enabled' : 'disabled'}`);
+                } else {
+                    addLog('Failed to update SOCKS5 authentication settings', true);
+                }
+            } catch (err) {
+                console.error('Error saving SOCKS5 auth settings:', err);
+                addLog('Error: Failed to update SOCKS5 authentication settings', true);
+            }
+        }
+
+        function scheduleSocks5AuthSave() {
+            if (socks5AuthSaveTimer) clearTimeout(socks5AuthSaveTimer);
+            socks5AuthSaveTimer = setTimeout(() => {
+                saveSocks5AuthSettings();
+            }, 300);
+        }
+
+        async function toggleSocks5Auth() {
+            updateSocks5AuthVisibility();
+            scheduleSocks5AuthSave();
         }
 
         async function startService() {
@@ -1429,6 +1551,23 @@ SlipStream VPN Server</pre>
             if (settings.verbose !== undefined) {
                 document.getElementById('verboseToggle').checked = settings.verbose;
             }
+
+            // Load SOCKS5 authentication settings
+            if (settings.socks5AuthEnabled !== undefined) {
+                document.getElementById('socks5AuthToggle').checked = !!settings.socks5AuthEnabled;
+            }
+            if (settings.socks5AuthUsername !== undefined) {
+                document.getElementById('socks5AuthUsername').value = settings.socks5AuthUsername || '';
+            }
+            if (settings.socks5AuthPassword !== undefined) {
+                document.getElementById('socks5AuthPassword').value = settings.socks5AuthPassword || '';
+            }
+            updateSocks5AuthVisibility();
+
+            const socksUserEl = document.getElementById('socks5AuthUsername');
+            const socksPassEl = document.getElementById('socks5AuthPassword');
+            if (socksUserEl) socksUserEl.addEventListener('input', scheduleSocks5AuthSave);
+            if (socksPassEl) socksPassEl.addEventListener('input', scheduleSocks5AuthSave);
             
             // Check system proxy status and update toggle (default to ON)
             const proxyStatus = await ipcRenderer.invoke('check-system-proxy');
