@@ -21,9 +21,18 @@
 <br>
 
 <div align="center">
+  <a href="README-FA.md">📄 مشاهده راهنمای فارسی</a>
+</div>
+
+<br>
+
+<div align="center">
   <strong>A modern, cross-platform GUI client for SlipStream VPN</strong><br>
   Provides secure, system-wide tunneling through an HTTP proxy interface
 </div>
+
+
+
 
 
 ---
@@ -31,6 +40,11 @@
 <div align="center">
   <img src="intro.png" alt="SlipStream GUI" width="300">
 </div>
+
+
+
+
+---
 
 ## 📥 Download & Install
 
