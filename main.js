@@ -913,7 +913,7 @@ ipcMain.handle('check-update', async () => {
     return new Promise((resolve) => {
       const options = {
         hostname: 'api.github.com',
-        path: '/repos/mirzaaghazadeh/SlipStreeamGUI/releases/latest',
+        path: '/repos/mirzaaghazadeh/SlipStreamGUI/releases/latest',
         method: 'GET',
         headers: {
           'User-Agent': 'SlipStream-GUI',
